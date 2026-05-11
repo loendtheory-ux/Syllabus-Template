@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Syllabus Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1c3545;
+  --green:#2a7a5e;
+  --green-lt:#f0f8f5;
+  --green-border:#c5ddd5;
+  --amber:#e89c20;
+  --border:#e2dfd9;
+  --bg:#f4f1ec;
+  --surface:#fff;
+  --text:#1c1c1c;
+  --muted:#666;
+  --hint:#999;
+  --danger-bg:#fde8e8;
+  --danger-border:#f5a0a0;
+  --danger-text:#7a1a1a;
+  --radius:8px;
+  --radius-lg:12px;
+}
+
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0}
+
+/* ════════════════════════════════
+   SCREEN VIEW
+════════════════════════════════ */
+.screen{max-width:100%;display:block}
+.builder{max-width:680px;margin:0 auto;padding:2rem 1.25rem 5rem}
+
+.bdr-hdr{text-align:center;margin-bottom:1.75rem}
+.bdr-hdr h1{font-family:'Lora',Georgia,serif;font-size:22px;font-weight:600;color:var(--navy);margin-bottom:5px}
+.bdr-hdr p{font-size:13px;color:var(--muted)}
+
+/* progress */
+.progress{display:flex;align-items:center;justify-content:center;margin-bottom:2rem}
+.pdot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;transition:all .2s}
+.pdot.done{background:var(--navy);color:#fff}
+.pdot.active{background:var(--green);color:#fff;box-shadow:0 0 0 3px rgba(42,122,94,.18)}
+.pdot.future{background:#e2dfd9;color:var(--hint)}
+.pline{flex:1;height:1.5px;max-width:40px;transition:background .2s}
+.pline.done{background:var(--navy)}
+.pline.pending{background:var(--border)}
+
+/* card */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.card-title{font-family:'Lora',Georgia,serif;font-size:17px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.card-sub{font-size:12.5px;color:var(--muted);margin-bottom:1.35rem;line-height:1.55}
+
+/* fields */
+.field{margin-bottom:1rem}
+.field:last-child{margin-bottom:0}
+label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+label em{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0;color:var(--hint);margin-left:4px}
+input[type=text],input[type=email],select,textarea{
+  width:100%;padding:.6rem .85rem;border:.5px solid var(--border);border-radius:var(--radius);
+  font-family:'DM Sans',system-ui,sans-serif;font-size:13.5px;color:var(--text);
+  background:#fdfcfb;outline:none;transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+textarea{resize:vertical;line-height:1.6}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
+
+/* competency blocks */
+.comp-block{border:.5px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-bottom:.7rem;background:#fdfcfb;position:relative}
+.comp-badge{display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#E1F5EE;background:var(--green);padding:2px 9px;border-radius:3px;margin-bottom:.75rem}
+.rm-btn{position:absolute;top:.9rem;right:.9rem;background:none;border:.5px solid var(--border);border-radius:4px;padding:2px 9px;font-size:11px;color:var(--hint);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.rm-btn:hover{color:var(--danger-text);border-color:var(--danger-border)}
+.add-comp{width:100%;padding:.7rem;border:1.5px dashed var(--border);border-radius:var(--radius);background:none;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--hint);cursor:pointer;transition:all .15s;margin-top:.25rem}
+.add-comp:hover{border-color:var(--green);color:var(--green)}
+
+/* nav */
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem}
+.btn{padding:.6rem 1.3rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;border:.5px solid var(--border);background:var(--surface);color:var(--text);transition:all .15s}
+.btn:hover{background:var(--bg)}
+.btn-navy{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-navy:hover{background:#16293a}
+.btn-navy:disabled,.btn-green:disabled{background:var(--border);color:var(--hint);border-color:var(--border);cursor:not-allowed}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green);padding:.7rem 2rem;font-size:14px}
+.btn-green:hover{background:#226650}
+
+/* review */
+.rev-row{font-size:13px;padding:.4rem 0;border-bottom:.5px solid var(--border);display:flex;gap:.6rem}
+.rev-row:last-child{border-bottom:none}
+.rev-row strong{color:var(--navy);min-width:130px;flex-shrink:0}
+.rev-row span{color:var(--muted)}
+
+/* error */
+.err{background:var(--danger-bg);border:.5px solid var(--danger-border);border-radius:var(--radius);padding:.8rem 1rem;font-size:13px;color:var(--danger-text);margin-top:.75rem;display:none}
+
+/* ════════════════════════════════
+   PRINT TOOLBAR
+════════════════════════════════ */
+.ptoolbar{display:none;max-width:760px;margin:0 auto;padding:1rem 1.25rem;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--border);background:var(--surface)}
+.ptoolbar p{font-size:13px;color:var(--muted)}
+.ptoolbar-btns{display:flex;gap:.6rem}
+
+/* ════════════════════════════════
+   SYLLABUS DOCUMENT
+════════════════════════════════ */
+.syllabus{display:none;max-width:760px;margin:0 auto;padding:2.5rem 3rem;background:var(--surface);font-family:'DM Sans',system-ui,sans-serif;font-size:13.5px;line-height:1.7;color:var(--text)}
+
+.syl-topbar{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:1rem;border-bottom:2.5px solid var(--navy);margin-bottom:1.5rem}
+.syl-school-name{font-size:12px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:2px}
+.syl-school-sub{font-size:11px;color:var(--hint);text-transform:uppercase;letter-spacing:.06em}
+.syl-teacher-block{text-align:right;font-size:12px;color:var(--muted);line-height:1.8}
+.syl-teacher-block strong{display:block;font-size:12px;font-weight:600;color:var(--navy)}
+
+.syl-course-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--hint);margin-bottom:3px}
+.syl-course-name{font-family:'Lora',Georgia,serif;font-size:28px;font-weight:600;color:var(--navy);line-height:1.15;margin-bottom:.35rem}
+.syl-course-meta{font-size:12px;color:var(--hint);display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.75rem}
+
+.syl-welcome{background:var(--green-lt);border-left:3px solid var(--green);padding:.95rem 1.2rem;margin-bottom:1.85rem;font-family:'Lora',Georgia,serif;font-style:italic;font-size:13.5px;color:#1d4a38;line-height:1.8}
+
+.syl-section{margin-bottom:1.85rem}
+.syl-section-title{font-family:'Lora',Georgia,serif;font-size:15.5px;font-weight:600;color:var(--navy);padding-bottom:.35rem;border-bottom:.5px solid var(--border);margin-bottom:.9rem;display:flex;align-items:baseline;gap:.6rem}
+.syl-tag{font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#E1F5EE;background:var(--navy);padding:2px 7px;border-radius:3px;font-style:normal}
+
+.syl-p{font-size:13px;color:var(--muted);margin-bottom:.6rem;line-height:1.7}
+
+.syl-comp{border:.5px solid var(--border);border-radius:var(--radius);padding:.9rem 1.05rem;margin-bottom:.6rem;background:#fdfcfb}
+.syl-comp-hdr{display:flex;align-items:baseline;gap:.7rem;margin-bottom:.3rem}
+.syl-comp-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#E1F5EE;background:var(--green);padding:2px 8px;border-radius:3px;flex-shrink:0}
+.syl-comp-name{font-weight:600;font-size:13.5px;color:var(--navy)}
+.syl-comp-desc{font-size:12.5px;color:var(--muted);line-height:1.6}
+.syl-comp-eg{font-size:11.5px;color:var(--hint);margin-top:.25rem;font-style:italic}
+
+/* scale table */
+.scale-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.scale-tbl thead tr{background:var(--navy);color:#fff}
+.scale-tbl th{padding:.5rem .75rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em}
+.scale-tbl th:first-child{border-radius:5px 0 0 0}
+.scale-tbl th:last-child{border-radius:0 5px 0 0;text-align:right}
+.scale-tbl td{padding:.55rem .75rem;border-bottom:.5px solid #eee;vertical-align:top;color:var(--muted)}
+.scale-tbl tr:last-child td{border-bottom:none}
+.scale-tbl tr:nth-child(even) td{background:#fafaf8}
+.score{display:inline-flex;width:23px;height:23px;border-radius:50%;font-size:11px;font-weight:600;align-items:center;justify-content:center}
+.s4{background:#d4edda;color:#1a5e2e}
+.s3{background:#d1e7f5;color:#0c3f6b}
+.s2{background:#fff3cd;color:#7a5000}
+.s1{background:#fde2e2;color:#7a1a1a}
+.si{background:#ede2fa;color:#3d1a70}
+
+/* weight bar */
+.wbar{display:flex;border-radius:4px;overflow:hidden;height:26px;font-size:11.5px;font-weight:600;margin:.65rem 0 .35rem}
+.wbar-f{background:var(--amber);color:#fff;display:flex;align-items:center;justify-content:center;width:30%}
+.wbar-s{background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;flex:1}
+.wbar-legend{display:flex;gap:1.5rem;font-size:11px;color:var(--hint);margin-bottom:.85rem}
+.wbar-legend span{display:flex;align-items:center;gap:5px}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0}
+
+/* assessment grid */
+.assess-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.abox{border:.5px solid var(--border);border-radius:var(--radius);padding:.8rem 1rem;background:#fdfcfb}
+.abox-title{font-weight:600;font-size:12.5px;color:var(--navy);margin-bottom:.35rem}
+.abox-desc{font-size:12px;color:var(--muted);margin-bottom:.45rem;line-height:1.5}
+.abox ul{list-style:none;font-size:12px;color:var(--muted)}
+.abox ul li{padding:2px 0;display:flex;gap:.4rem}
+.abox ul li::before{content:'→';color:var(--green);font-weight:600;flex-shrink:0}
+
+/* policy grid */
+.policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.pitem{padding:.8rem 1rem;border:.5px solid var(--border);border-radius:var(--radius);background:#fdfcfb}
+.pq{font-weight:600;font-size:12.5px;color:var(--navy);margin-bottom:.25rem}
+.pa{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* checklist */
+.cklist{list-style:none}
+.cklist li{font-size:12.5px;color:var(--muted);padding:.3rem 0;display:flex;gap:.65rem;border-bottom:.5px solid #f0ede8}
+.cklist li:last-child{border-bottom:none}
+.cklist li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* sign block */
+.sign-block{background:var(--green-lt);border:0.5px solid var(--green-border);border-radius:var(--radius);padding:1.1rem 1.35rem}
+.sign-title{font-weight:600;font-size:13px;color:var(--navy);margin-bottom:.4rem}
+.sign-note{font-size:12.5px;color:var(--muted);margin-bottom:1rem;line-height:1.6}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem 2.5rem}
+.sig-line{border-bottom:.5px solid #aaa;min-height:28px}
+.sig-label{font-size:10px;color:var(--hint);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+
+.syl-footer{margin-top:2rem;padding-top:.85rem;border-top:.5px solid var(--border);font-size:10.5px;color:var(--hint);display:flex;justify-content:space-between}
+
+/* timeline form table */
+.tl-form-tbl{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.tl-form-tbl thead tr{background:var(--navy);color:#fff}
+.tl-form-tbl th{padding:.5rem .6rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em}
+.tl-form-tbl td{border-bottom:.5px solid var(--border);padding:.2rem .15rem}
+.tl-form-tbl tr:last-child td{border-bottom:none}
+.tl-form-tbl input{border:.5px solid transparent;border-radius:4px;padding:.35rem .5rem;background:transparent;font-family:'DM Sans',system-ui,sans-serif;font-size:12.5px;color:var(--text);outline:none;transition:border-color .15s;width:100%}
+.tl-form-tbl input:focus{border-color:var(--green);background:#fff}
+.tl-form-tbl tr:nth-child(even) td{background:#fafaf8}
+
+/* timeline syllabus output */
+.tl-tbl{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+.tl-tbl thead tr{background:var(--navy);color:#fff}
+.tl-tbl th{padding:.55rem .75rem;text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em}
+.tl-tbl th:first-child{border-radius:5px 0 0 0}
+.tl-tbl th:last-child{border-radius:0 5px 0 0}
+.tl-tbl td{padding:.55rem .75rem;border-bottom:.5px solid #eee;vertical-align:top;line-height:1.5}
+.tl-tbl tr:last-child td{border-bottom:none}
+.tl-tbl .tl-when{font-size:11.5px;color:var(--hint);white-space:nowrap}
+.tl-tbl .tl-topic{font-weight:500;color:var(--navy)}
+.tl-tbl .tl-assess{color:#0c3f6b;font-size:12px}
+.tl-tbl .tl-project{color:#226650;font-size:12px}
+.tl-tbl tr:nth-child(even) td{background:#fafaf8}
+.tl-tbl tr td.has-assess{background:#f0f6fc}
+.tl-tbl tr td.has-project{background:#f0f8f5}
+
+.key-dates{margin-top:1rem;border:.5px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.key-dates-hdr{background:#fafaf8;padding:.55rem .85rem;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:.5px solid var(--border)}
+.key-date-row{display:flex;align-items:baseline;gap:.75rem;padding:.5rem .85rem;border-bottom:.5px solid var(--border);font-size:12.5px}
+.key-date-row:last-child{border-bottom:none}
+.key-date-when{min-width:90px;color:var(--hint);font-size:11.5px;flex-shrink:0}
+.key-date-what{color:var(--text)}
+.kd-tag{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:3px;margin-right:5px;vertical-align:middle}
+.kd-assess{background:#d1e7f5;color:#0c3f6b}
+.kd-project{background:#d4edda;color:#1a5e2e}
+@media print{
+  body{background:#fff!important;margin:0;padding:0}
+  .screen,.ptoolbar{display:none!important}
+  .syllabus{display:block!important;padding:1.5rem 2rem;max-width:100%;box-shadow:none}
+  .syl-comp,.abox,.pitem,.tl-tbl,.key-dates{break-inside:avoid}
+  .syl-section{break-inside:avoid}
+}
+
+/* ════════════════════════════════
+   RESPONSIVE
+════════════════════════════════ */
+@media(max-width:580px){
+  .g2,.g3,.assess-grid,.policy-grid,.sig-grid{grid-template-columns:1fr}
+  .syllabus{padding:1.5rem 1.25rem}
+  .syl-topbar{flex-direction:column;gap:.5rem}
+  .syl-teacher-block{text-align:left}
+}
+</style>
+</head>
+<body>
+
+<!-- ════ SCREEN ════ -->
+<div class="screen" id="screen">
+<div class="builder">
+
+  <div class="bdr-hdr">
+    <h1>Syllabus Builder</h1>
+    <p>Fill in each step — your printable syllabus is generated instantly, no internet required.</p>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="step-content"></div>
+
+</div>
+</div>
+
+<!-- ════ PRINT TOOLBAR ════ -->
+<div class="ptoolbar" id="ptoolbar">
+  <p>Your syllabus is ready. Use <strong>File → Print</strong> (or Ctrl/Cmd+P) and choose <em>Save as PDF</em>.</p>
+  <div class="ptoolbar-btns">
+    <button class="btn" onclick="restart()">← Start over</button>
+    <button class="btn btn-navy" onclick="window.print()">🖨 Print / Save as PDF</button>
+  </div>
+</div>
+
+<!-- ════ SYLLABUS ════ -->
+<div class="syllabus" id="syllabus"></div>
+
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const S = {
+  school:'', district:'', teacher:'', email:'', phone:'', officeHours:'',
+  course:'', code:'', grade:'', credits:'1.0', year:'',
+  description:'', pathway:'Regents Exam', welcome:'',
+  comps:[
+    {name:'',desc:'',eg:''},
+    {name:'',desc:'',eg:''},
+    {name:'',desc:'',eg:''}
+  ],
+  timeline:[
+    {when:'',topic:'',summative:'',project:''},
+    {when:'',topic:'',summative:'',project:''},
+    {when:'',topic:'',summative:'',project:''},
+  ],
+  revision:'Students may revise summative work after completing a brief self-reflection and teacher conference. The revised score replaces the original.',
+  late:'Late work is accepted without grade penalty. Missing work is marked Incomplete — not zero — and can still be submitted for a score.',
+  gradeIntegrity:'Behavior, participation points, extra credit, and effort alone do not affect competency scores. Grades reflect demonstrated learning only.',
+  help:'Office hours are available as listed. Any student earning a 1 or 2 on a competency will be personally invited to a conference to build a plan for improvement.',
+  succeed:[
+    'Use feedback from every formative task — it tells you exactly what to work on before being scored.',
+    'Ask for help early. A score of 2 is not a problem; ignoring it is. Revision is always available.',
+    'Read the rubric before you begin any assignment. The target is always visible in advance.',
+    'Stay current — catching up becomes harder as the semester moves forward.',
+    'Show what you know in the way that works best for you. Multiple assessment formats exist for a reason.',
+    'Attend office hours. Conferences are not just for students who are struggling — they help everyone grow.'
+  ],
+  other:''
+};
+
+const STEPS = ['Course info','Overview','Competencies','Policies','Course timeline','Tips & review'];
+let cur = 0;
+
+// ─── PROGRESS ────────────────────────────────────────────
+function renderProgress(){
+  document.getElementById('progress').innerHTML = STEPS.map((s,i)=>{
+    const cls = i<cur?'done':i===cur?'active':'future';
+    const lbl = i<cur?'✓':i+1;
+    const line = i>0?`<div class="pline ${i<=cur?'done':'pending'}"></div>`:'';
+    return `${line}<div class="pdot ${cls}" title="${s}">${lbl}</div>`;
+  }).join('');
+}
+
+// ─── HELPERS ─────────────────────────────────────────────
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const field = (lbl,hint,html) => `<div class="field"><label>${lbl}${hint?`<em>${hint}</em>`:''}</label>${html}</div>`;
+const inp = (key,ph,type='text') => `<input type="${type}" data-key="${key}" value="${esc(S[key])}" placeholder="${ph}">`;
+const ta = (key,ph,rows=3) => `<textarea data-key="${key}" rows="${rows}" placeholder="${ph}">${esc(S[key])}</textarea>`;
+const sel = (key,opts) => `<select data-key="${key}">${opts.map(o=>`<option ${o===S[key]?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+
+// ─── STEP RENDERERS ──────────────────────────────────────
+function step0(){
+  return `<div class="card">
+    <div class="card-title">Course &amp; teacher information</div>
+    <div class="card-sub">This appears in the header of your syllabus.</div>
+    <div class="g2">
+      ${field('School name','',inp('school','e.g. Mineola High School'))}
+      ${field('District','optional',inp('district','e.g. Mineola UFSD'))}
+    </div>
+    <div class="g2">
+      ${field('Teacher name','',inp('teacher','e.g. Dr. Sacrestano'))}
+      ${field('Email','',inp('email','teacher@school.edu','email'))}
+    </div>
+    <div class="g2">
+      ${field('Phone','optional',inp('phone','(516) 555-0100'))}
+      ${field('Office hours','',inp('officeHours','Mon & Wed 2:30–3:30, or by appointment'))}
+    </div>
+    ${field('Course name','',inp('course','e.g. Regents Chemistry'))}
+    <div class="g3">
+      ${field('Course code','optional',inp('code','e.g. CHEM10R'))}
+      ${field('Grade level','',inp('grade','e.g. 10th Grade'))}
+      ${field('Credits','',inp('credits','1.0'))}
+    </div>
+    ${field('School year','',inp('year','2025–2026'))}
+  </div>${nav()}`;
+}
+
+function step1(){
+  return `<div class="card">
+    <div class="card-title">Course overview</div>
+    <div class="card-sub">Write in your own words — bullet points, rough notes, or full sentences. This becomes the course overview students and families read.</div>
+    ${field('What is this course about?',''  ,ta('description','Describe what students will study, major topics or units, and why the course matters. A few sentences is enough.',5))}
+    ${field('NYS pathway / end goal','',sel('pathway',['Regents Exam','AP Exam','College-Level Work','Next Course in Sequence','Career & Technical Education','Portfolio Assessment']))}
+    ${field('Opening message to students','optional',ta('welcome','Optional: write a personal welcome note that appears at the top of the syllabus. Leave blank to use a default.',3))}
+  </div>${nav()}`;
+}
+
+function step2(){
+  const blocks = S.comps.map((c,i)=>`
+    <div class="comp-block">
+      <span class="comp-badge">Competency ${i+1}</span>
+      ${S.comps.length>2?`<button class="rm-btn" onclick="removeComp(${i})">Remove</button>`:''}
+      <div class="field" style="margin-bottom:.7rem">
+        <label>Competency name</label>
+        <input type="text" data-compkey="${i}.name" value="${esc(c.name)}" placeholder="e.g. Molecular Modeling">
+      </div>
+      <div class="field" style="margin-bottom:.7rem">
+        <label>What will students be able to do?</label>
+        <textarea rows="3" data-compkey="${i}.desc" placeholder="e.g. Students will construct and interpret molecular models to explain bonding, polarity, and intermolecular forces.">${esc(c.desc)}</textarea>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Assessed through <em>optional</em></label>
+        <input type="text" data-compkey="${i}.eg" value="${esc(c.eg)}" placeholder="e.g. Lab reports, unit tests, model-building tasks">
+      </div>
+    </div>`).join('');
+
+  return `<div class="card">
+    <div class="card-title">Course competencies</div>
+    <div class="card-sub">List the essential skills students will develop, tied to NYS Learning Standards. Be specific — what will students be able to <em>do</em>? Minimum 2, no maximum.</div>
+    ${blocks}
+    ${S.comps.length<8?`<button class="add-comp" onclick="addComp()">+ Add another competency</button>`:''}
+  </div>${nav()}`;
+}
+
+function step3(){
+  return `<div class="card">
+    <div class="card-title">Course policies</div>
+    <div class="card-sub">These defaults are ready to use — edit any of them to match your classroom. Written directly to students and families.</div>
+    ${field('Revision &amp; reassessment','',ta('revision','',3))}
+    ${field('Late &amp; missing work','',ta('late','',3))}
+    ${field('What will NOT affect a competency score','',ta('gradeIntegrity','',2))}
+    ${field('How to get extra help','',ta('help','',2))}
+    ${field('Anything else families should know','optional',ta('other','Academic integrity policy, required materials, classroom norms, contact preferences, etc.',3))}
+  </div>${nav()}`;
+}
+
+function step4(){
+  const rows = S.timeline.map((r,i)=>`
+    <tr>
+      <td style="padding:.45rem .5rem;vertical-align:top">
+        <input type="text" data-tlkey="${i}.when" value="${esc(r.when)}" placeholder="e.g. Sept 4–18" style="width:100%;min-width:0;font-size:12.5px">
+      </td>
+      <td style="padding:.45rem .5rem;vertical-align:top">
+        <input type="text" data-tlkey="${i}.topic" value="${esc(r.topic)}" placeholder="e.g. Atomic Structure" style="width:100%;min-width:0;font-size:12.5px">
+      </td>
+      <td style="padding:.45rem .5rem;vertical-align:top">
+        <input type="text" data-tlkey="${i}.summative" value="${esc(r.summative)}" placeholder="e.g. Unit Test – Oct 12" style="width:100%;min-width:0;font-size:12.5px">
+      </td>
+      <td style="padding:.45rem .5rem;vertical-align:top">
+        <input type="text" data-tlkey="${i}.project" value="${esc(r.project)}" placeholder="e.g. Lab Report – Oct 18" style="width:100%;min-width:0;font-size:12.5px">
+      </td>
+      <td style="padding:.45rem .35rem;vertical-align:top;text-align:center">
+        ${S.timeline.length>2?`<button class="rm-btn" onclick="removeTlRow(${i})" style="position:static;padding:3px 7px">✕</button>`:''}
+      </td>
+    </tr>`).join('');
+
+  return `<div class="card">
+    <div class="card-title">Course timeline</div>
+    <div class="card-sub">Give students a clear picture of what's coming all year. Add one row per unit or date range. Summative assessments and projects can share a row or have their own.</div>
+    <div style="overflow-x:auto;margin-bottom:.75rem">
+      <table class="tl-form-tbl">
+        <thead>
+          <tr>
+            <th style="width:16%">When <span style="font-weight:400;font-size:10px">(date or week)</span></th>
+            <th style="width:30%">Unit / Topic</th>
+            <th style="width:25%">Summative assessment</th>
+            <th style="width:25%">Project / major work</th>
+            <th style="width:4%"></th>
+          </tr>
+        </thead>
+        <tbody id="tl-body">${rows}</tbody>
+      </table>
+    </div>
+    <button class="add-comp" onclick="addTlRow()">+ Add row</button>
+    <p style="font-size:11.5px;color:var(--hint);margin-top:.75rem;font-style:italic">Leave any cell blank if nothing applies for that row. Summative and project columns appear highlighted in the printed syllabus.</p>
+  </div>${nav()}`;
+}
+
+function step5(){
+  const fc = S.comps.filter(c=>c.name&&c.desc);
+  const tips = S.succeed.map((t,i)=>`
+    <div class="field" style="margin-bottom:.65rem">
+      <label>Tip ${i+1}</label>
+      <input type="text" data-succeedkey="${i}" value="${esc(t)}">
+    </div>`).join('');
+
+  return `<div class="card">
+    <div class="card-title">"How to succeed" tips</div>
+    <div class="card-sub">These appear at the end of the syllabus. Edit them to match your teaching style and course expectations.</div>
+    ${tips}
+    <button class="add-comp" onclick="addTip()" style="margin-top:.25rem">+ Add another tip</button>
+  </div>
+  <div class="card" style="margin-top:.75rem">
+    <div class="card-title">Review &amp; generate</div>
+    <div class="card-sub">Everything looks good? Click Generate to build your print-ready syllabus.</div>
+    <div class="rev-row"><strong>Course</strong><span>${esc(S.course)||'—'}</span></div>
+    <div class="rev-row"><strong>Teacher</strong><span>${esc(S.teacher)} · ${esc(S.email)}</span></div>
+    <div class="rev-row"><strong>School / Year</strong><span>${esc(S.school)} · ${esc(S.year)}</span></div>
+    <div class="rev-row"><strong>Grade / Credits</strong><span>${esc(S.grade)} · ${esc(S.credits)} credit(s)</span></div>
+    <div class="rev-row"><strong>Pathway</strong><span>${esc(S.pathway)}</span></div>
+    <div class="rev-row"><strong>Competencies (${fc.length})</strong><span>${fc.map((c,j)=>`C${j+1}: ${esc(c.name)}`).join(' · ')||'—'}</span></div>
+    <div class="rev-row"><strong>Timeline rows</strong><span>${S.timeline.filter(r=>r.when||r.topic).length} filled in</span></div>
+  </div>
+  <div class="nav">
+    <button class="btn" onclick="go(-1)">← Back</button>
+    <button class="btn btn-green" onclick="generate()" id="gen-btn" ${fc.length<2?'disabled':''}>Generate syllabus →</button>
+  </div>
+  <div class="err" id="err">Please add at least 2 competencies with a name and description before generating.</div>`;
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────
+function canAdvance(){
+  const checks = [
+    ()=>S.school.trim()&&S.teacher.trim()&&S.email.trim()&&S.course.trim()&&S.grade.trim()&&S.year.trim(),
+    ()=>S.description.trim().length>10,
+    ()=>S.comps.filter(c=>c.name.trim()&&c.desc.trim()).length>=2,
+    ()=>true,
+    ()=>true,
+    ()=>true
+  ];
+  return checks[cur]();
+}
+
+function nav(){
+  const ok = canAdvance();
+  const back = cur>0?`<button class="btn" onclick="go(-1)">← Back</button>`:`<div></div>`;
+  return `<div class="nav">${back}<button id="nav-next" class="btn btn-navy" onclick="go(1)" ${!ok?'disabled':''}>Next →</button></div>`;
+}
+
+function go(dir){
+  cur = Math.max(0,Math.min(STEPS.length-1, cur+dir));
+  renderStep();
+}
+
+function addComp(){S.comps.push({name:'',desc:'',eg:''});renderStep();}
+function removeComp(i){if(S.comps.length>2){S.comps.splice(i,1);renderStep();}}
+function addTlRow(){S.timeline.push({when:'',topic:'',summative:'',project:''});renderStep();}
+function removeTlRow(i){if(S.timeline.length>2){S.timeline.splice(i,1);renderStep();}}
+function restart(){
+  cur=0;
+  document.getElementById('screen').style.display='';
+  document.getElementById('ptoolbar').style.display='none';
+  document.getElementById('syllabus').style.display='none';
+  renderProgress();renderStep();
+}
+
+// ─── BIND INPUTS ─────────────────────────────────────────
+function updateNavBtn(){
+  const btn = document.getElementById('nav-next');
+  if(btn) btn.disabled = !canAdvance();
+}
+
+function bindInputs(){
+  document.querySelectorAll('[data-key]').forEach(el=>{
+    el.addEventListener('input',()=>{ S[el.dataset.key]=el.value; updateNavBtn(); });
+    if(el.tagName==='SELECT') el.addEventListener('change',()=>{ S[el.dataset.key]=el.value; updateNavBtn(); });
+  });
+  document.querySelectorAll('[data-compkey]').forEach(el=>{
+    el.addEventListener('input',()=>{
+      const [i,k]=el.dataset.compkey.split('.');
+      S.comps[+i][k]=el.value;
+      updateNavBtn();
+    });
+  });
+  document.querySelectorAll('[data-tlkey]').forEach(el=>{
+    el.addEventListener('input',()=>{
+      const [i,k]=el.dataset.tlkey.split('.');
+      S.timeline[+i][k]=el.value;
+    });
+  });
+  document.querySelectorAll('[data-succeedkey]').forEach(el=>{
+    el.addEventListener('input',()=>{ S.succeed[+el.dataset.succeedkey]=el.value; });
+  });
+}
+
+function renderStep(){
+  const renders=[step0,step1,step2,step3,step4,step5];
+  document.getElementById('step-content').innerHTML=renders[cur]();
+  renderProgress();
+  bindInputs();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── GENERATE SYLLABUS ───────────────────────────────────
+function generate(){
+  const fc=S.comps.filter(c=>c.name&&c.desc);
+  if(fc.length<2){
+    const e=document.getElementById('err');
+    if(e)e.style.display='block';
+    return;
+  }
+
+  const welcome = S.welcome.trim()
+    ? S.welcome
+    : `Welcome to ${S.course}. My name is ${S.teacher||'your teacher'} and I'm looking forward to learning with you this year. This syllabus explains exactly how your learning will be assessed, what your grade means, and how you can always improve — please read it carefully and keep it for reference.`;
+
+  const scores=[
+    {cls:'s4',num:'4',lbl:'Advanced',   desc:'Demonstrates mastery beyond grade-level expectations. Applies skills independently to new or complex situations and can explain thinking clearly.',nys:'95–100'},
+    {cls:'s3',num:'3',lbl:'Proficient', desc:'Meets grade-level expectations consistently and independently. A 3 is the target — it means you have learned what this course set out to teach.',nys:'80–94'},
+    {cls:'s2',num:'2',lbl:'Developing', desc:'Shows partial understanding with some errors or gaps. With revision and continued practice, a 3 is within reach.',nys:'65–79'},
+    {cls:'s1',num:'1',lbl:'Beginning',  desc:'Early-stage understanding with significant gaps. Support and intervention are available — this is a starting point, not a final answer.',nys:'55–64'},
+    {cls:'si',num:'I',lbl:'Incomplete', desc:'Not enough evidence yet to assign a score. This is not a zero — submitting work will result in a score.',nys:'Pending'},
+  ];
+
+  const tips = S.succeed.filter(t=>t.trim());
+
+  document.getElementById('syllabus').innerHTML=`
+
+    <div class="syl-topbar">
+      <div>
+        <span class="syl-school-name">${esc(S.school)}</span>
+        <span class="syl-school-sub">${esc(S.district||'')}${S.district?' · ':''}New York State</span>
+      </div>
+      <div class="syl-teacher-block">
+        <strong>${esc(S.teacher)}</strong>
+        ${esc(S.email)}${S.phone?`<br>${esc(S.phone)}`:''}
+        <br>Office Hours: ${esc(S.officeHours||'By appointment')}
+      </div>
+    </div>
+
+    <div>
+      <div class="syl-course-label">Course Syllabus</div>
+      <div class="syl-course-name">${esc(S.course)}</div>
+      <div class="syl-course-meta">
+        ${S.code?`<span>Code: ${esc(S.code)}</span>`:''}
+        <span>Grade: ${esc(S.grade)}</span>
+        <span>Credits: ${esc(S.credits)}</span>
+        <span>Year: ${esc(S.year)}</span>
+      </div>
+    </div>
+
+    <div class="syl-welcome">${esc(welcome)}</div>
+
+    <div class="syl-section">
+      <div class="syl-section-title">Course overview</div>
+      <p class="syl-p">${esc(S.description)}</p>
+      <p class="syl-p" style="font-size:12px">This course is aligned to <strong>New York State Learning Standards</strong> and prepares students for <strong>${esc(S.pathway)}</strong>.</p>
+    </div>
+
+    <div class="syl-section">
+      <div class="syl-section-title">Course competencies <span class="syl-tag">What you'll learn</span></div>
+      <p class="syl-p">Your grade is built around <strong>competencies</strong> — the essential skills this course develops, each tied to NYS Learning Standards. Mastering these is the goal of everything we do.</p>
+      ${fc.map((c,i)=>`
+        <div class="syl-comp">
+          <div class="syl-comp-hdr">
+            <span class="syl-comp-label">C${i+1}</span>
+            <span class="syl-comp-name">${esc(c.name)}</span>
+          </div>
+          <div class="syl-comp-desc">${esc(c.desc)}</div>
+          ${c.eg?`<div class="syl-comp-eg">Assessed through: ${esc(c.eg)}</div>`:''}
+        </div>`).join('')}
+    </div>
+
+    <div class="syl-section">
+      <div class="syl-section-title">Proficiency scale <span class="syl-tag">How work is scored</span></div>
+      <p class="syl-p" style="margin-bottom:.75rem">All graded work is scored on a <strong>4-point scale</strong> that describes your level of mastery — not how many points you accumulated. A <strong>3 is the target</strong> for every student.</p>
+      <table class="scale-tbl">
+        <thead><tr>
+          <th style="width:48px">Score</th>
+          <th style="width:100px">Level</th>
+          <th>What it means for your work</th>
+          <th>NYS Grade</th>
+        </tr></thead>
+        <tbody>
+          ${scores.map(r=>`<tr>
+            <td><span class="score ${r.cls}">${r.num}</span></td>
+            <td style="font-weight:600;color:var(--navy)">${r.lbl}</td>
+            <td>${r.desc}</td>
+            <td style="text-align:right;white-space:nowrap">${r.nys}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="syl-section">
+      <div class="syl-section-title">How your grade is built <span class="syl-tag">Formative &amp; summative</span></div>
+      <p class="syl-p">Your grade comes from two types of assessment, each serving a different purpose:</p>
+      <div class="wbar">
+        <div class="wbar-f">Formative — 30%</div>
+        <div class="wbar-s">Summative — 70%</div>
+      </div>
+      <div class="wbar-legend">
+        <span><span class="dot" style="background:var(--amber)"></span>Formative: low-stakes practice &amp; feedback</span>
+        <span><span class="dot" style="background:var(--navy)"></span>Summative: scored demonstrations of mastery</span>
+      </div>
+      <div class="assess-grid">
+        <div class="abox">
+          <div class="abox-title">Formative assessment</div>
+          <div class="abox-desc">Practice work that builds skills and earns written feedback — not a grade that counts toward your competency score.</div>
+          <ul>
+            <li>Exit tickets &amp; warm-ups</li>
+            <li>Drafts &amp; skill practice</li>
+            <li>Low-stakes quizzes</li>
+            <li>Peer review &amp; discussion</li>
+            <li>Checkpoints &amp; conferencing</li>
+          </ul>
+        </div>
+        <div class="abox">
+          <div class="abox-title">Summative assessment</div>
+          <div class="abox-desc">Demonstrations of mastery scored on the 4-point scale above. Varied formats — not just tests.</div>
+          <ul>
+            <li>Performance tasks</li>
+            <li>Projects &amp; presentations</li>
+            <li>Unit assessments</li>
+            <li>Research &amp; lab reports</li>
+            <li>Portfolio &amp; capstone work</li>
+          </ul>
+        </div>
+      </div>
+      <p style="font-size:11.5px;color:var(--hint);font-style:italic;margin-top:.65rem">Your final grade reflects your most consistent, recent evidence of mastery — not an average of every score across the year.</p>
+    </div>
+
+    <div class="syl-section">
+      <div class="syl-section-title">Course timeline <span class="syl-tag">What's coming & when</span></div>
+      <p class="syl-p">The table below shows every unit, assessment, and major project for the year. Dates are approximate and may be adjusted — any changes will be announced in class with adequate notice.</p>
+      ${(()=>{
+        const rows = S.timeline.filter(r=>r.when||r.topic||r.summative||r.project);
+        if(!rows.length) return '<p class="syl-p" style="font-style:italic;color:var(--hint)">Course schedule to be distributed.</p>';
+        const keyDates = rows.filter(r=>r.summative||r.project);
+        return `
+          <table class="tl-tbl">
+            <thead><tr>
+              <th style="width:17%">When</th>
+              <th style="width:33%">Unit / Topic</th>
+              <th style="width:25%">Summative assessment</th>
+              <th style="width:25%">Project / major work</th>
+            </tr></thead>
+            <tbody>
+              ${rows.map(r=>`<tr>
+                <td class="tl-when">${esc(r.when)||'—'}</td>
+                <td class="tl-topic">${esc(r.topic)||'—'}</td>
+                <td class="${r.summative?'has-assess':''} tl-assess">${r.summative?'📝 '+esc(r.summative):'—'}</td>
+                <td class="${r.project?'has-project':''} tl-project">${r.project?'📋 '+esc(r.project):'—'}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+          ${keyDates.length?`
+          <div class="key-dates">
+            <div class="key-dates-hdr">Key dates at a glance</div>
+            ${keyDates.map(r=>`
+              <div class="key-date-row">
+                <span class="key-date-when">${esc(r.when)||'TBD'}</span>
+                <span class="key-date-what">
+                  ${r.summative?`<span class="kd-tag kd-assess">Assessment</span>${esc(r.summative)}`:''}
+                  ${r.summative&&r.project?'<br>':''}
+                  ${r.project?`<span class="kd-tag kd-project">Project</span>${esc(r.project)}`:''}
+                </span>
+              </div>`).join('')}
+          </div>`:''}`;
+      })()}
+    </div>
+
+    <div class="syl-section">
+      <div class="syl-section-title">Course policies</div>
+      <div class="policy-grid">
+        <div class="pitem">
+          <div class="pq">Can I revise my work?</div>
+          <div class="pa">${esc(S.revision)}</div>
+        </div>
+        <div class="pitem">
+          <div class="pq">What about late or missing work?</div>
+          <div class="pa">${esc(S.late)}</div>
+        </div>
+        <div class="pitem">
+          <div class="pq">What will NOT affect my grade?</div>
+          <div class="pa">${esc(S.gradeIntegrity)}</div>
+        </div>
+        <div class="pitem">
+          <div class="pq">How can I get extra help?</div>
+          <div class="pa">${esc(S.help)}</div>
+        </div>
+        ${S.other.trim()?`<div class="pitem" style="grid-column:1/-1">
+          <div class="pq">Additional information</div>
+          <div class="pa">${esc(S.other)}</div>
+        </div>`:''}
+      </div>
+    </div>
+
+    ${tips.length?`<div class="syl-section">
+      <div class="syl-section-title">How to succeed in this course</div>
+      <ul class="cklist">${tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+    </div>`:''}
+
+    <div class="syl-section">
+      <div class="sign-block">
+        <div class="sign-title">Please sign &amp; return by ___________</div>
+        <p class="sign-note">By signing below, the student and parent/guardian confirm they have read this syllabus and understand how learning is assessed in this course. Please keep a copy for your records. Questions are always welcome — contact ${esc(S.teacher)} at <strong>${esc(S.email)}</strong>${S.phone?' or '+esc(S.phone):''}.
+        </p>
+        <div class="sig-grid">
+          <div><div class="sig-line"></div><div class="sig-label">Student name (print)</div></div>
+          <div><div class="sig-line"></div><div class="sig-label">Student signature &amp; date</div></div>
+          <div><div class="sig-line"></div><div class="sig-label">Parent / guardian name (print)</div></div>
+          <div><div class="sig-line"></div><div class="sig-label">Parent / guardian signature &amp; date</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="syl-footer">
+      <span>${esc(S.school)} · ${esc(S.course)} · ${esc(S.year)}</span>
+      <span>NYS Learning Standards · Competency-Based Grading</span>
+    </div>
+  `;
+
+  document.getElementById('screen').style.display='none';
+  document.getElementById('ptoolbar').style.display='flex';
+  document.getElementById('syllabus').style.display='block';
+  window.scrollTo({top:0});
+}
+
+// ─── INIT ────────────────────────────────────────────────
+renderProgress();
+renderStep();
+</script>
+</body>
+</html>
